@@ -10,9 +10,13 @@ import (
 )
 
 type Info struct {
-	IP            string               `json:"IP"`
-	Port          string               `json:"port"`
-	Neighbours    []string             `json:"neighbors"`
+	IP         string            `json:"IP"`
+	Port       string            `json:"port"`
+	Neighbours []string          `json:"neighbors"`
+	Nodes      []string          `json:"nodes"`
+	LG         map[string]int    `json:"lg"`
+	Length     map[string]int    `json:"length"`
+	RoutingTo  map[string]string `json:"routingTo"`
 }
 
 // Just for pretty printing Node info
@@ -23,19 +27,72 @@ func (i Info) String() string {
 // Create is used a constructor that instantiates a new node using it's initial knowledge.
 //
 // A node must be created with initial knowledge of it's network IP, ID, and the IDs of it's neighbors.
-func Create(ip, port string, neighbors []string) *Info {
+func Create(ip, port string, neighbours []Models.Edge, nodes []string) *Info {
 	newNode := Info{
-		IP:            ip,
-		Port:          port,
-		Neighbours:    neighbors,
+		IP:        ip,
+		Port:      port,
+		Nodes:     nodes,
+		LG:        make(map[string]int),
+		Length:    make(map[string]int),
+		RoutingTo: make(map[string]string),
 	}
+
+	for _, neighbour := range neighbours {
+		newNode.Neighbours = append(newNode.Neighbours, neighbour.Node)
+		newNode.LG[neighbour.Node] = neighbour.Distance
+	}
+
+	for _, node := range newNode.Nodes {
+		newNode.Length[node] = 1000
+	}
+	newNode.Length[newNode.Port] = 0
 
 	return &newNode
 }
 
 // TODO
 func (i *Info) Start() {
+	for _, neighbor := range i.Neighbours {
+		msgOut := Models.Message{
+			Source: i.Port,
+			Intent: constants.IntentSendUpdate,
+			Length: i.Length,
+		}
+		if err := i.SendMsg(msgOut, neighbor); err != nil {
+			fmt.Printf("Error sending message")
+			return // failure, terminate
+		}
+	}
+}
 
+// TODO
+func (i *Info) ReceiveUpdate(msgIn Models.Message) {
+	updated := false
+	j := msgIn.Source
+
+	for _, k := range i.Nodes {
+		if k != i.Port {
+			if i.Length[k] > (i.LG[j] + msgIn.Length[k]) {
+				i.Length[k] = i.LG[j] + msgIn.Length[k]
+				i.RoutingTo[k] = j
+				updated = true
+			}
+		}
+	}
+
+	if updated {
+		for _, neighbour := range i.Neighbours {
+			msgOut := Models.Message{
+				Source: i.Port,
+				Intent: constants.IntentSendUpdate,
+				Length: i.Length,
+			}
+			if err := i.SendMsg(msgOut, neighbour); err != nil {
+				fmt.Println("Error sending message")
+				return // failure, terminate
+			}
+		}
+	}
 }
 
 // TODO
@@ -83,7 +140,7 @@ func (i *Info) ListenOnPort() {
 
 		switch msg.Intent {
 		case constants.IntentSendUpdate:
-
+			i.ReceiveUpdate(msg)
 		}
 	}
 }

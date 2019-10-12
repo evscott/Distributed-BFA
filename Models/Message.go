@@ -5,16 +5,16 @@ import (
 )
 
 // Pair representing a pair of node ID's, I and J.
-type Pair struct {
-	I string `json:"i"`
-	J string `json:"j"`
+type Edge struct {
+	Node     string `json:"i"`
+	Distance int    `json:"j"`
 }
 
 // TODO
 type Message struct {
-	Source     string           `json:"source"`
-	Intent     constants.Intent `json:"intent"`
-	Data       string           `json:"data"`
+	Source string           `json:"source"`
+	Intent constants.Intent `json:"intent"`
+	Length map[string]int   `json:"length"`
 }
 
 // Just for pretty printing Request/Response info.
