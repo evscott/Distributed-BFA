@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// Info represents the knowledge of a node learning of shortest paths across a distributed
+// system by Raynal's definition.
 type Info struct {
 	IP         string            `json:"IP"`
 	Port       string            `json:"port"`
@@ -50,7 +52,8 @@ func Create(ip, port string, neighbours []Models.Edge, nodes []string) *Info {
 	return &newNode
 }
 
-// TODO
+// Start is an external command that triggers a node to contact its neighbors and begin the
+// processes of discovering its list of shortest paths across the distributed system.
 func (i *Info) Start() {
 	for _, neighbor := range i.Neighbours {
 		msgOut := Models.Message{
@@ -65,8 +68,9 @@ func (i *Info) Start() {
 	}
 }
 
-// TODO
-func (i *Info) ReceiveUpdate(msgIn Models.Message) {
+// Update handles the event of a node receiving a "Update" messages, and sends
+// update messages to its neighbours if necessary.
+func (i *Info) Update(msgIn Models.Message) {
 	updated := false
 	j := msgIn.Source
 
@@ -95,7 +99,7 @@ func (i *Info) ReceiveUpdate(msgIn Models.Message) {
 	}
 }
 
-// TODO
+// SendMsg handles sending messages across the distributed system using a destination.
 func (i *Info) SendMsg(msg Models.Message, dest string) error {
 	connOut, err := net.DialTimeout("tcp", i.IP+":"+dest, time.Duration(10)*time.Second)
 	if err != nil {
@@ -140,7 +144,7 @@ func (i *Info) ListenOnPort() {
 
 		switch msg.Intent {
 		case constants.IntentSendUpdate:
-			i.ReceiveUpdate(msg)
+			i.Update(msg)
 		}
 	}
 }

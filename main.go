@@ -21,6 +21,25 @@ func main() {
 	runExample(ip)
 }
 
+func printNeighbourPaths(node *Node.Info) {
+	for dest, cost := range node.LG {
+		fmt.Printf("%s --> %s, cost: %d\n", node.Port, dest, cost)
+	}
+}
+
+func printShortestPaths(node *Node.Info) {
+	for dest, cost := range node.Length {
+		fmt.Printf("%s --> %s, cost: %d\n", node.Port, dest, cost)
+	}
+}
+
+// runExample creates a distributed system and finds the shortest path between all of its nodes.
+//
+// This example follows the graph in `assets/example.png` with the following name assignments:
+// `1` = `8001`
+// `2` = `8002`
+// `2` = `8003`
+// ... etc
 func runExample(ip string) {
 	allNodes := []string{"8001", "8002", "8003", "8004", "8005"}
 
@@ -91,9 +110,37 @@ func runExample(ip string) {
 
 	time.Sleep(time.Second)
 
-	fmt.Printf("%s paths: %v\n", n1.Port, n1.Length)
-	fmt.Printf("%s paths: %v\n", n2.Port, n2.Length)
-	fmt.Printf("%s paths: %v\n", n3.Port, n3.Length)
-	fmt.Printf("%s paths: %v\n", n4.Port, n4.Length)
-	fmt.Printf("%s paths: %v\n", n5.Port, n5.Length)
+	fmt.Println("Neighbour paths:")
+
+	fmt.Println()
+	printNeighbourPaths(n1)
+
+	fmt.Println()
+	printNeighbourPaths(n2)
+
+	fmt.Println()
+	printNeighbourPaths(n3)
+
+	fmt.Println()
+	printNeighbourPaths(n4)
+
+	fmt.Println()
+	printNeighbourPaths(n5)
+
+	fmt.Println("\nShortest paths:")
+
+	fmt.Println()
+	printShortestPaths(n1)
+
+	fmt.Println()
+	printShortestPaths(n2)
+
+	fmt.Println()
+	printShortestPaths(n3)
+
+	fmt.Println()
+	printShortestPaths(n4)
+
+	fmt.Println()
+	printShortestPaths(n5)
 }

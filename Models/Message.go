@@ -10,7 +10,11 @@ type Edge struct {
 	Distance int    `json:"j"`
 }
 
-// TODO
+// The format for a Request/Response in finding a shortest path across a distributed system.
+//
+// Source represents the Message sender.
+// Intent represents the messages intent; i.e., whether it is to be handled by `Update` or some other handler.
+// Length represents the `Source`'s lengths spanning across the distributed system; i.e.: how far away node Z is from Y.
 type Message struct {
 	Source string           `json:"source"`
 	Intent constants.Intent `json:"intent"`
